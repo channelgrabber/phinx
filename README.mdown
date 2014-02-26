@@ -1,6 +1,7 @@
 # [Phinx](http://phinx.org): Simple PHP Database Migrations
 
 [![Build Status](https://travis-ci.org/robmorgan/phinx.png?branch=0.2.x-dev)](https://travis-ci.org/robmorgan/phinx)
+[![Code Coverage](https://scrutinizer-ci.com/g/robmorgan/phinx/badges/coverage.png?s=9776e35b967f5adb0f4958bd72b617e0a9519f7d)](https://scrutinizer-ci.com/g/robmorgan/phinx/)
 [![Latest Stable Version](https://poser.pugx.org/robmorgan/phinx/version.png)](https://packagist.org/packages/robmorgan/phinx)
 [![Total Downloads](https://poser.pugx.org/robmorgan/phinx/d/total.png)](https://packagist.org/packages/robmorgan/phinx)
 
@@ -115,11 +116,28 @@ Copy the `phpunit.xml.dist` template to `phpunit.xml` and change the configurati
   
 ## News & Updates
 
-Follow Rob (@_rjm_) on Twitter to stay to date (http://twitter.com/_rjm_)
+Follow Rob (@\_rjm\_) on Twitter to stay to date (http://twitter.com/_rjm_)
   
 ## Misc
 
 ### Version History
+
+**0.3.2** (Monday, 24th February 2014)
+
+* Adding better Postgres type support
+
+**0.3.1** (Sunday, 23rd February 2014)
+
+* Adding MySQL charset support to the YAML config
+* Removing trailing spaces
+
+**0.3.0** (Sunday, 2nd February 2014)
+
+* PSR-2 support
+* Method to add timestamps easily to tables
+* Support for column comments in the Postgres adapter
+* Fixes for MySQL driver options
+* Fixes for MySQL biginteger type
 
 **0.2.9** (Saturday, 16th November 2013)
 
@@ -237,7 +255,7 @@ Follow Rob (@_rjm_) on Twitter to stay to date (http://twitter.com/_rjm_)
 
 (The MIT license)
 
-Copyright (c) 2013 Rob Morgan
+Copyright (c) 2014 Rob Morgan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

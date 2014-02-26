@@ -3,7 +3,7 @@
  * Phinx
  *
  * (The MIT license)
- * Copyright (c) 2013 Rob Morgan
+ * Copyright (c) 2014 Rob Morgan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated * documentation files (the "Software"), to
@@ -28,12 +28,12 @@
  */
 namespace Phinx\Console;
 
-use Symfony\Component\Console\Application,
-    Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Input\InputDefinition,
-    Symfony\Component\Console\Input\InputOption,
-    Symfony\Component\Console\Output\OutputInterface,
-    Phinx\Console\Command;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Phinx\Console\Command;
 
 /**
  * Phinx console application.

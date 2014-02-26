@@ -3,7 +3,7 @@
  * Phinx
  *
  * (The MIT license)
- * Copyright (c) 2013 Rob Morgan
+ * Copyright (c) 2014 Rob Morgan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated * documentation files (the "Software"), to
@@ -28,9 +28,9 @@
  */
 namespace Phinx\Migration;
 
-use Phinx\Db\Table,
-    Phinx\Db\Adapter\AdapterInterface,
-    Phinx\Migration\MigrationInterface;
+use Phinx\Db\Table;
+use Phinx\Db\Adapter\AdapterInterface;
+use Phinx\Migration\MigrationInterface;
 
 /**
  * Abstract Migration Class. 

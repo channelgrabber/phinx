@@ -3,7 +3,7 @@
  * Phinx
  *
  * (The MIT license)
- * Copyright (c) 2013 Rob Morgan
+ * Copyright (c) 2014 Rob Morgan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated * documentation files (the "Software"), to
@@ -221,7 +221,7 @@ class ForeignKey
             // handle $options['delete'] as $options['update']
             if (strtolower($option) == 'delete' || strtolower($option) == 'update') {
                 if (defined('self::' . strtoupper($value))) {
-                    $this->{'setOn' . ucfirst(strtolower($option))}(strtoupper($value));
+                    $this->{'setOn' . ucfirst(strtolower($option))}(constant('self::' . strtoupper($value)));
                 }
             } else {
                 $method = 'set' . ucfirst($option);

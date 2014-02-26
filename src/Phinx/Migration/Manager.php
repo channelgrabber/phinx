@@ -3,7 +3,7 @@
  * Phinx
  *
  * (The MIT license)
- * Copyright (c) 2013 Rob Morgan
+ * Copyright (c) 2014 Rob Morgan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated * documentation files (the "Software"), to
@@ -28,12 +28,12 @@
  */
 namespace Phinx\Migration;
 
-use Symfony\Component\Config\FileLocator,
-    Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Console\Output\NullOutput,
-    Phinx\Db\Adapter\AdapterInterface,
-    Phinx\Config\Config,
-    Phinx\Migration\Manager\Environment;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\NullOutput;
+use Phinx\Db\Adapter\AdapterInterface;
+use Phinx\Config\Config;
+use Phinx\Migration\Manager\Environment;
 
 class Manager
 {
