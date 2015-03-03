@@ -38,7 +38,8 @@ use RecursiveDirectoryIterator;
 
 class Manager
 {
-    const POLL_DELAY = 30;
+    const POLL_DELAY = 2;
+    const POLL_MESSAGE_FREQUENCY = 15;
 
     /**
      * @var \ArrayAccess
@@ -194,7 +195,10 @@ class Manager
     {
         $timeWaited = 0;
         do {
-            echo "Migration {$migration->getVersion()} in progress. Waiting ($timeWaited secs)...\n";
+            if ($timeWaited % (static::POLL_MESSAGE_FREQUENCY * static::POLL_DELAY) == 0) {
+                echo "Migration {$migration->getVersion()} in progress. Waiting ($timeWaited secs)...\n";
+            }
+
             sleep(static::POLL_DELAY);
             $timeWaited += static::POLL_DELAY;
 
