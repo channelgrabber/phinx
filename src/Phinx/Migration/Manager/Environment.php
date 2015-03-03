@@ -92,6 +92,8 @@ class Environment
     public function executeMigration(MigrationInterface $migration, $direction = MigrationInterface::UP)
     {
         $startTime = time();
+        $this->getAdapter()->migrating($migration, $direction, date('Y-m-d H:i:s', $startTime), null);
+
         $direction = ($direction == MigrationInterface::UP) ? MigrationInterface::UP : MigrationInterface::DOWN;
         $migration->setAdapter($this->getAdapter());
         
@@ -204,6 +206,16 @@ class Environment
     public function getVersions()
     {
         return $this->getAdapter()->getVersions();
+    }
+
+    /**
+     * Gets all migrating version numbers.
+     *
+     * @return array
+     */
+    public function getPendingVersions()
+    {
+        return $this->getAdapter()->getPendingVersions();
     }
     
     /**

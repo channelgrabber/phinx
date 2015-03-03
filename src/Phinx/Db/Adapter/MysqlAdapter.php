@@ -32,6 +32,7 @@ use Phinx\Db\Table;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table\ForeignKey;
+use Phinx\Migration\MigrationInterface;
 
 /**
  * Phinx MySQL Adapter.
@@ -98,7 +99,61 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
             }
         }
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasSchemaTable()
+    {
+        if (! $this->hasTable($this->getSchemaTableName())) {
+            return false;
+        }
+
+        if (! $this->hasIndex('phinxlog', 'version')) {
+            $this->updateSchemaTable();
+        }
+        return true;
+    }
+
+    protected function updateSchemaTable()
+    {
+        $this->getOutput()->writeln('<info>'.$this->getSchemaTableName() . ' schema out of date. updating schema</info>');
+
+        try {
+            $oldTable = $this->getSchemaTableName() . '_old';
+            $this->renameTable($this->getSchemaTableName(), $oldTable);
+            $this->createSchemaTable();
+            $this->execute('INSERT INTO phinxlog SELECT version, start_time, end_time FROM ' . $oldTable . ' GROUP BY version');
+            $this->dropTable($oldTable);
+
+        } catch (\Exception $exception) {
+            throw new \InvalidArgumentException('There was a problem updating the schema table: ' . $exception->getMessage());
+        }
+
+        $this->getOutput()->writeln('<comment>finished updating '.$this->getSchemaTableName() . ' schema</comment>');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createSchemaTable()
+    {
+        try {
+            $options = array(
+                'id' => false,
+                'primary_key' => 'version'
+            );
+
+            $table = new \Phinx\Db\Table($this->getSchemaTableName(), $options, $this);
+            $table->addColumn('version', 'biginteger', ['length' => 14])
+                ->addColumn('start_time', 'timestamp')
+                ->addColumn('end_time', 'timestamp', ['null' => true])
+                ->save();
+        } catch (\Exception $exception) {
+            throw new \InvalidArgumentException('There was a problem creating the schema table: ' . $exception->getMessage());
+        }
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -879,5 +934,45 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
             }
         }
         return $def;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function migrating(MigrationInterface $migration, $direction, $startTime)
+    {
+        return $this->migrated($migration, $direction, $startTime, null);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime)
+    {
+        if (strtolower($direction) == MigrationInterface::UP) {
+            // up
+            $sql = sprintf(
+                'INSERT INTO %s ('
+                . 'version, start_time, end_time'
+                . ') VALUES ('
+                . '"%s",'
+                . '"%s",'
+                . ($endTime ? '"%s"' : 'null')
+                . ') ON DUPLICATE KEY UPDATE end_time = VALUES(end_time);',
+                $this->getSchemaTableName(),
+                $migration->getVersion(),
+                $startTime,
+                $endTime
+            );
+        } else {
+            // down
+            $sql = sprintf(
+                "DELETE FROM %s WHERE version = '%s'",
+                $this->getSchemaTableName(),
+                $migration->getVersion()
+            );
+        }
+        $this->query($sql);
+        return $this;
     }
 }

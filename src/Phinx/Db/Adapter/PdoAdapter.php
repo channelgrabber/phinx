@@ -301,15 +301,13 @@ abstract class PdoAdapter implements AdapterInterface
         }
         return $rows;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function getVersions()
     {
-        $versions = array();
-        
-        $rows = $this->fetchAll(sprintf('SELECT * FROM %s ORDER BY version ASC', $this->getSchemaTableName()));
+        $rows = $this->fetchAll(sprintf('SELECT * FROM %s WHERE end_time IS NOT NULL ORDER BY version ASC', $this->getSchemaTableName()));
         return array_map(
             function ($v) {
                 return $v['version'];
@@ -317,7 +315,30 @@ abstract class PdoAdapter implements AdapterInterface
             $rows
         );
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPendingVersions()
+    {
+        $rows = $this->fetchAll(sprintf('SELECT * FROM %s WHERE end_time IS NULL ORDER BY version ASC', $this->getSchemaTableName()));
+        return array_map(
+            function ($v) {
+                return $v['version'];
+            },
+            $rows
+        );
+    }
+
+    /**
+     * Not implemented
+     * {@inheritdoc}
+     */
+    public function migrating(MigrationInterface $migration, $direction, $startTime)
+    {
+        return $this;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -338,8 +359,6 @@ abstract class PdoAdapter implements AdapterInterface
                 $startTime,
                 $endTime
             );
-
-            $this->query($sql);
         } else {
             // down
             $sql = sprintf(
@@ -347,10 +366,8 @@ abstract class PdoAdapter implements AdapterInterface
                 $this->getSchemaTableName(),
                 $migration->getVersion()
             );
-            
-            $this->query($sql);
         }
-
+        $this->query($sql);
         return $this;
     }
     

@@ -38,6 +38,8 @@ use RecursiveDirectoryIterator;
 
 class Manager
 {
+    const POLL_DELAY = 30;
+
     /**
      * @var \ArrayAccess
      */
@@ -132,6 +134,7 @@ class Manager
         $migrations = $this->getMigrations();
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
+        $pendingVersions = $env->getPendingVersions();
         $current = $env->getCurrentVersion();
         
         if (empty($versions) && empty($migrations)) {
@@ -161,6 +164,10 @@ class Manager
                     break;
                 }
 
+                if (in_array($migration->getVersion(), $pendingVersions)) {
+                    list($versions, $pendingVersions) = $this->waitOnPendingMigration($migration, $env);
+                }
+
                 if (in_array($migration->getVersion(), $versions)) {
                     $this->executeMigration($environment, $migration, MigrationInterface::DOWN);
                 }
@@ -173,12 +180,32 @@ class Manager
                 break;
             }
 
-            if (!in_array($migration->getVersion(), $versions)) {
+            if (in_array($migration->getVersion(), $pendingVersions)) {
+                list($versions, $pendingVersions) = $this->waitOnPendingMigration($migration, $env);
+            }
+
+            if (! in_array($migration->getVersion(), $versions)) {
                 $this->executeMigration($environment, $migration, MigrationInterface::UP);
             }
         }
     }
-    
+
+    protected function waitOnPendingMigration(MigrationInterface $migration, Environment $env)
+    {
+        $timeWaited = 0;
+        do {
+            echo "Migration {$migration->getVersion()} in progress. Waiting ($timeWaited secs)...\n";
+            sleep(static::POLL_DELAY);
+            $timeWaited += static::POLL_DELAY;
+
+            $versions = $env->getVersions();
+            $pendingVersions = $env->getPendingVersions();
+
+        } while (in_array($migration->getVersion(), $pendingVersions));
+
+        return [$versions, $pendingVersions];
+    }
+
     /**
      * Execute a migration against the specified Environment.
      *
@@ -221,6 +248,7 @@ class Manager
         $migrations = $this->getMigrations();
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
+        $pendingVersions = $env->getPendingVersions();
         $current = $env->getCurrentVersion();
         
         ksort($migrations);
@@ -258,6 +286,10 @@ class Manager
         foreach ($migrations as $migration) {
             if ($migration->getVersion() <= $version) {
                 break;
+            }
+
+            if (in_array($migration->getVersion(), $pendingVersions)) {
+                list($versions, $pendingVersions) = $this->waitOnPendingMigration($migration, $env);
             }
 
             if (in_array($migration->getVersion(), $versions)) {

@@ -193,7 +193,23 @@ class ProxyAdapter implements AdapterInterface
     {
         return $this->getAdapter()->getVersions();
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPendingVersions()
+    {
+        return $this->getAdapter()->getPendingVersions();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function migrating(MigrationInterface $migration, $direction, $startTime)
+    {
+        $this->getAdapter()->migrating($migration, $direction, $startTime);
+    }
+
     /**
      * {@inheritdoc}
      */

@@ -50,6 +50,13 @@ interface AdapterInterface
     public function getVersions();
 
     /**
+     * Get all version numbers where migration is in progress.
+     *
+     * @return array
+     */
+    public function getPendingVersions();
+
+    /**
      * Sets the console output.
      *
      * @param OutputInterface $output Output
@@ -64,6 +71,16 @@ interface AdapterInterface
      */
     public function getOutput();
     
+    /**
+     * Records a migration starting.
+     *
+     * @param MigrationInterface $migration Migration
+     * @param string $direction Direction
+     * @param int $startTime Start Time
+     * @return AdapterInterface
+     */
+    public function migrating(MigrationInterface $migration, $direction, $startTime);
+
     /**
      * Records a migration being run.
      *
