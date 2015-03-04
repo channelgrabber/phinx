@@ -146,7 +146,7 @@ class Manager
             $version = max(array_merge($versions, array_keys($migrations)));
         } else {
             if (0 != $version && !isset($migrations[$version])) {
-                $output->writeln(sprintf(
+                $this->getOutput()->writeln(sprintf(
                     '<comment>warning</comment> %s is not a valid version',
                     $version
                 ));
@@ -194,9 +194,10 @@ class Manager
     protected function waitOnPendingMigration(MigrationInterface $migration, Environment $env)
     {
         $timeWaited = 0;
+        $this->getOutput()->writeln('');
         do {
-            if ($timeWaited % (static::POLL_MESSAGE_FREQUENCY * static::POLL_DELAY) == 0) {
-                echo "Migration {$migration->getVersion()} in progress. Waiting ($timeWaited secs)...\n";
+            if ($timeWaited % (static::POLL_DELAY * (int) static::POLL_MESSAGE_FREQUENCY) == 0) {
+                $this->getOutput()->writeln("<comment>Migration <info>{$migration->getVersion()}</info> in progress. Waiting ($timeWaited secs)...</comment>");
             }
 
             sleep(static::POLL_DELAY);

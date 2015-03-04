@@ -962,8 +962,18 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
                 $startTime,
                 $endTime
             );
+            $this->query($sql);
+            return $this;
+        }
+
+        // down
+        if (! $endTime) {
+            $sql = sprintf(
+                "UPDATE %s SET end_time = null WHERE version = '%s'",
+                $this->getSchemaTableName(),
+                $migration->getVersion()
+            );
         } else {
-            // down
             $sql = sprintf(
                 "DELETE FROM %s WHERE version = '%s'",
                 $this->getSchemaTableName(),
