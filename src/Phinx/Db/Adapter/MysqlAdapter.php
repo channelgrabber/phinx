@@ -213,17 +213,23 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
      */
     public function hasTable($tableName)
     {
-        $options = $this->getOptions();
-        
+        $tableName = explode('.', $tableName);
+
+        if (count($tableName) == 2) {
+            $database = $tableName[0];
+        } else {
+            $database = $this->getOptions()['name'];
+        }
+        $tableName = end($tableName);
+
         $tables = array();
-        $rows = $this->fetchAll(sprintf('SHOW TABLES IN `%s`', $options['name']));
+        $rows = $this->fetchAll(sprintf('SHOW TABLES IN `%s`', $database));
         foreach ($rows as $row) {
             $tables[] = strtolower($row[0]);
         }
-        
         return in_array(strtolower($tableName), $tables);
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -895,9 +901,9 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
     {
         $def = '';
         if ($index->getType() == Index::UNIQUE) {
-            $def .= ' UNIQUE KEY (`' . implode('`,`', $index->getColumns()) . '`)';
+            $def .= ' UNIQUE KEY `' . $index->getName() . '` (`' . implode('`,`', $index->getColumns()) . '`)';
         } else {
-            $def .= ' KEY (`' . implode('`,`', $index->getColumns()) . '`)';
+            $def .= ' KEY  `' . $index->getName() . '` (`' . implode('`,`', $index->getColumns()) . '`)';
         }
         return $def;
     }
