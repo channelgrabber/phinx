@@ -115,16 +115,14 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function updateSchemaTable()
     {
         $this->getOutput()->writeln('<info>'.$this->getSchemaTableName() . ' schema out of date. updating schema</info>');
         try {
-            $oldTable = $this->getSchemaTableName() . '_old';
-            $this->renameTable($this->getSchemaTableName(), $oldTable);
-            $this->createSchemaTable();
-            $this->execute('INSERT INTO ' . $this->getSchemaTableName() . ' SELECT version, start_time, end_time FROM ' . $oldTable . ' GROUP BY version');
-            $this->dropTable($oldTable);
-
+            $this->execute("ALTER TABLE `" . $this->getSchemaTableName() . "` ADD PRIMARY KEY (version), MODIFY COLUMN `end_time` timestamp NULL");
         } catch (\Exception $exception) {
             throw new \InvalidArgumentException('There was a problem updating the schema table: ' . $exception->getMessage());
         }
