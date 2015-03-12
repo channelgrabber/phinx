@@ -44,6 +44,18 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
 
     protected $signedColumnTypes = array('integer' => true, 'biginteger' => true, 'float' => true, 'decimal' => true);
 
+    const TEXT_TINY    = 255;
+    const TEXT_SMALL   = 255; /* deprecated, alias of TEXT_TINY */
+    const TEXT_REGULAR = 65535;
+    const TEXT_MEDIUM  = 16777215;
+    const TEXT_LONG    = 4294967295;
+    
+    const INT_TINY    = 255;
+    const INT_SMALL   = 65535;
+    const INT_MEDIUM  = 16777215;
+    const INT_REGULAR = 4294967295;
+    const INT_BIG     = 18446744073709551615;
+
     /**
      * {@inheritdoc}
      */
