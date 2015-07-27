@@ -472,7 +472,7 @@ class Column
             }
             
             // proxy length -> limit
-            if (strtolower($option) == 'length') {
+            if (strcasecmp($option, 'length') === 0) {
                 $this->setLimit($value);
                 continue;
             }
