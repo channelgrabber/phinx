@@ -53,7 +53,7 @@ class Index
     /**
      * @var string
      */
-    protected $name;
+    protected $name = null;
     
     /**
      * Sets the index columns.
@@ -99,37 +99,15 @@ class Index
         return $this->type;
     }
 
-    /**
-     * Sets the index name.
-     *
-     * @param string $name
-     * @return Index
-     */
     public function setName($name)
     {
-        $this->type = $name;
+        $this->name = $name;
         return $this;
     }
 
-    /**
-     * Gets the index name.
-     *
-     * @return string
-     */
     public function getName()
     {
-        return $this->name ? $this->name : $this->getDefaultName();
-    }
-
-    protected function getDefaultName()
-    {
-        return implode(
-            '',
-            array_map(
-                'ucfirst',
-                $this->getColumns()
-            )
-        );
+        return $this->name;
     }
     
     /**

@@ -65,7 +65,7 @@ abstract class AbstractCommand extends Command
     protected function configure()
     {
         $this->addOption('--configuration', '-c', InputArgument::OPTIONAL, 'The configuration file to load');
-        $this->addOption('--parser', '-p', InputArgument::OPTIONAL, 'Parser used to read the config file.  Defaults to YAML');
+        $this->addOption('--parser', '-p', InputArgument::OPTIONAL, 'Parser used to read the config file. Defaults to YAML');
     }
     
     /**
@@ -195,6 +195,9 @@ abstract class AbstractCommand extends Command
             $extension = pathinfo($configFilePath, PATHINFO_EXTENSION);
 
             switch (strtolower($extension)) {
+                case 'json':
+                    $parser = 'json';
+                    break;
                 case 'php':
                     $parser = 'php';
                     break;
@@ -206,6 +209,9 @@ abstract class AbstractCommand extends Command
         }
 
         switch (strtolower($parser)) {
+            case 'json':
+                $config = Config::fromJSON($configFilePath);
+                break;
             case 'php':
                 $config = Config::fromPHP($configFilePath);
                 break;

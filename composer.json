@@ -2,19 +2,28 @@
     "name": "channelgrabber/phinx",
     "type": "library",
     "description": "Phinx makes it ridiculously easy to manage the database migrations for your PHP app.",
-    "keywords": ["phinx", "migrations", "database", "db", "database migrations"],
+    "keywords": [
+        "phinx",
+        "migrations",
+        "database",
+        "db",
+        "database migrations"
+    ],
     "homepage": "http://phinx.org",
     "license": "MIT",
-    "authors": [{
-        "name": "Rob Morgan",
-        "email": "robbym@gmail.com",
-        "homepage": "http://robmorgan.id.au"
-    }],
+    "authors": [
+        {
+            "name": "Rob Morgan",
+            "email": "robbym@gmail.com",
+            "homepage": "http://robmorgan.id.au",
+            "role": "Lead Developer"
+        }
+    ],
     "require": {
         "php": ">=5.3.2",
-        "symfony/console": "2.*",
-        "symfony/config": "2.*",
         "symfony/class-loader": "2.*",
+        "symfony/config": "2.*",
+        "symfony/console": "2.*",
         "symfony/yaml": "2.*"
     },
     "require-dev": {
@@ -26,8 +35,10 @@
             "Phinx": "src/"
         }
     },
-    "bin": ["bin/phinx"],
+    "bin": [
+        "bin/phinx"
+    ],
     "replace": {
-        "robmorgan/phinx" : "*"
+        "robmorgan/phinx": "*"
     }
 }

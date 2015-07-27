@@ -372,7 +372,8 @@ class Column
      */
     public function setSigned($signed)
     {
-        $this->signed = (bool)$signed;
+        $this->signed = (bool) $signed;
+        return $this;
     }
 
     /**

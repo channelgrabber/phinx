@@ -534,10 +534,38 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
     public function dropIndex($tableName, $columns)
     {
         $this->startCommandTimer();
+        if (is_string($columns)) {
+            $columns = array($columns); // str to array
+        }
+        
         $this->writeCommand('dropIndex', array($tableName, $columns));
+        $indexes = $this->getIndexes($tableName);
+        $columns = array_map('strtolower', $columns);
+        
+        foreach ($indexes as $indexName => $index) {
+            $a = array_diff($columns, $index['columns']);
+            if (empty($a)) {
+                $this->execute(
+                    sprintf(
+                        'DROP INDEX IF EXISTS %s',
+                        $this->quoteColumnName($indexName)
+                    )
+                );
+                return $this->endCommandTimer();
+            }
+        }
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function dropIndexByName($tableName, $indexName)
+    {
+        $this->startCommandTimer();
+        $this->writeCommand('dropIndexByName', array($tableName, $indexName));
         $sql = sprintf(
             'DROP INDEX IF EXISTS %s',
-            $this->getIndexName($tableName, $columns)
+            $indexName
         );
         $this->execute($sql);
         $this->endCommandTimer();
@@ -640,8 +668,8 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
                 $rows = $this->fetchAll(sprintf(
                     "SELECT CONSTRAINT_NAME
                       FROM information_schema.KEY_COLUMN_USAGE
-                      WHERE REFERENCED_TABLE_SCHEMA = DATABASE()
-                        AND REFERENCED_TABLE_NAME IS NOT NULL
+                      WHERE TABLE_SCHEMA = CURRENT_DATABASE()
+                        AND TABLE_NAME IS NOT NULL
                         AND TABLE_NAME = '%s'
                         AND COLUMN_NAME = '%s'
                       ORDER BY POSITION_IN_UNIQUE_CONSTRAINT",
@@ -662,24 +690,24 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
     public function getSqlType($type)
     {
         switch ($type) {
-            case 'integer':
-            case 'text':
-            case 'decimal':
-            case 'time':
-            case 'date':
-            case 'boolean':
-            case 'json':
+            case static::PHINX_TYPE_INTEGER:
+            case static::PHINX_TYPE_TEXT:
+            case static::PHINX_TYPE_DECIMAL:
+            case static::PHINX_TYPE_TIME:
+            case static::PHINX_TYPE_DATE:
+            case static::PHINX_TYPE_BOOLEAN:
+            case static::PHINX_TYPE_JSON:
                 return array('name' => $type);
-            case 'string':
+            case static::PHINX_TYPE_STRING:
                 return array('name' => 'character varying', 'limit' => 255);
-            case 'biginteger':
+            case static::PHINX_TYPE_BIG_INTEGER:
                 return array('name' => 'bigint');
-            case 'float':
+            case static::PHINX_TYPE_FLOAT:
                 return array('name' => 'real');
-            case 'datetime':
-            case 'timestamp':
+            case static::PHINX_TYPE_DATETIME:
+            case static::PHINX_TYPE_TIMESTAMP:
                 return array('name' => 'timestamp');
-            case 'binary':
+            case static::PHINX_TYPE_BINARY:
                 return array('name' => 'bytea');
             default:
                 throw new \RuntimeException('The type: "' . $type . '" is not supported');
@@ -697,41 +725,41 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
         switch ($sqlType) {
             case 'character varying':
             case 'varchar':
-                return 'string';
+                return static::PHINX_TYPE_STRING;
             case 'text':
             case 'json':
-                return 'text';
+                return static::PHINX_TYPE_TEXT;
             case 'int':
             case 'int4':
             case 'integer':
-                return 'integer';
+                return static::PHINX_TYPE_INTEGER;
             case 'decimal':
             case 'numeric':
-                return 'decimal';
+                return static::PHINX_TYPE_DECIMAL;
             case 'bigint':
             case 'int8':
-                return 'biginteger';
+                return static::PHINX_TYPE_BIG_INTEGER;
             case 'real':
             case 'float4':
-                return 'float';
+                return static::PHINX_TYPE_FLOAT;
             case 'bytea':
-                return 'binary';
+                return static::PHINX_TYPE_BINARY;
                 break;
             case 'time':
             case 'timetz':
             case 'time with time zone':
             case 'time without time zone':
-                return 'time';
+                return static::PHINX_TYPE_TIME;
             case 'date':
-                return 'date';
+                return static::PHINX_TYPE_DATE;
             case 'timestamp':
             case 'timestamptz':
             case 'timestamp with time zone':
             case 'timestamp without time zone':
-                return 'datetime';
+                return static::PHINX_TYPE_DATETIME;
             case 'bool':
             case 'boolean':
-                return 'boolean';
+                return static::PHINX_TYPE_BOOLEAN;
             default:
                 throw new \RuntimeException('The PostgreSQL type: "' . $sqlType . '" is not supported');
         }
@@ -834,10 +862,20 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
      */
     protected function getIndexSqlDefinition(Index $index, $tableName)
     {
+        $indexName = '';
+        if (is_string($index->getName())) {
+            $indexName = $index->getName();
+        } else {
+            $columnNames = $index->getColumns();
+            if (is_string($columnNames)) {
+                $columnNames = array($columnNames);
+            }
+            $indexName = sprintf('%s_%s', $tableName, implode('_', $columnNames));
+        }
         $def = sprintf(
             "CREATE %s INDEX %s ON %s (%s);",
             ($index->getType() == Index::UNIQUE ? 'UNIQUE' : ''),
-            $this->getIndexName($tableName, $index->getColumns()),
+            $indexName,
             $this->quoteTableName($tableName),
             implode(',', $index->getColumns())
         );
@@ -994,23 +1032,6 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
             $schemaNames[] = $item['schema_name'];
         }
         return $schemaNames;
-    }
-
-    /**
-     * Returns index name.
-     *
-     * @param string       $tableName   Table name.
-     * @param string|array $columnNames Column names.
-     *
-     * @return string
-     */
-    private function getIndexName($tableName, $columnNames)
-    {
-        if (is_string($columnNames)) {
-            $columnNames = array($columnNames);
-        }
-        $indexName = sprintf('%s_%s', $tableName, implode('_', $columnNames));
-        return $indexName;
     }
 
     /**
