@@ -68,9 +68,8 @@ abstract class PdoAdapter implements AdapterInterface
     /**
      * Class Constructor.
      *
-     * @param array           $options Options
-     * @param OutputInterface $output  Output Interface
-     * @return void
+     * @param array $options Options
+     * @param OutputInterface $output Output Interface
      */
     public function __construct(array $options, OutputInterface $output = null)
     {
@@ -84,7 +83,7 @@ abstract class PdoAdapter implements AdapterInterface
      * Sets the adapter options.
      *
      * @param array $options Options
-     * return AdapterInterface
+     * @return AdapterInterface
      */
     public function setOptions(array $options)
     {
@@ -132,7 +131,7 @@ abstract class PdoAdapter implements AdapterInterface
      * Sets the schema table name.
      *
      * @param string $schemaTableName Schema Table Name
-     * @return void
+     * @return PdoAdapter
      */
     public function setSchemaTableName($schemaTableName)
     {
@@ -244,7 +243,8 @@ abstract class PdoAdapter implements AdapterInterface
                 
                     $outArr[] = '\'' . $arg . '\'';
                 }
-                return $this->getOutput()->writeln(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
+                $this->getOutput()->writeln(' -- ' . $command . '(' . implode(', ', $outArr) . ')');
+                return;
             }
             $this->getOutput()->writeln(' -- ' . $command);
         }
@@ -370,30 +370,7 @@ abstract class PdoAdapter implements AdapterInterface
         $this->query($sql);
         return $this;
     }
-    
-    /**
-     * Describes a database table.
-     *
-     * @todo MySQL Specific so move to MysqlAdapter.
-     * @return array
-     */
-    public function describeTable($tableName)
-    {
-        $options = $this->getOptions();
-        
-        // mysql specific
-        $sql = sprintf(
-            'SELECT *'
-            . ' FROM information_schema.tables'
-            . ' WHERE table_schema = "%s"'
-            . ' AND table_name = "%s"',
-            $options['name'],
-            $tableName
-        );
-        
-        return $this->fetchRow($sql);
-    }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -412,7 +389,7 @@ abstract class PdoAdapter implements AdapterInterface
                 'id' => false
             );
             
-            $table = new \Phinx\Db\Table($this->getSchemaTableName(), $options, $this);
+            $table = new Table($this->getSchemaTableName(), $options, $this);
             $table->addColumn('version', 'biginteger', array('limit' => 14))
                   ->addColumn('start_time', 'timestamp')
                   ->addColumn('end_time', 'timestamp')

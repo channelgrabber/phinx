@@ -28,9 +28,9 @@
  */
 namespace Phinx\Migration\Manager;
 
+use Phinx\Db\Adapter\SqlServerAdapter;
 use Symfony\Component\Console\Output\OutputInterface;
 use Phinx\Db\Adapter\AdapterInterface;
-use Phinx\Db\Adapter\PdoAdapter;
 use Phinx\Db\Adapter\MysqlAdapter;
 use Phinx\Db\Adapter\PostgresAdapter;
 use Phinx\Db\Adapter\SQLiteAdapter;
@@ -68,13 +68,13 @@ class Environment
      * @var AdapterInterface
      */
     protected $adapter;
-    
+
     /**
      * Class Constructor.
      *
      * @param string $name Environment Name
      * @param array $options Options
-     * @return void
+     * @return Environment
      */
     public function __construct($name, $options)
     {
@@ -282,6 +282,9 @@ class Environment
                         break;
                     case 'sqlite':
                         $this->setAdapter(new SQLiteAdapter($this->options, $this->getOutput()));
+                        break;
+                    case 'sqlsrv':
+                        $this->setAdapter(new SqlServerAdapter($this->options, $this->getOutput()));
                         break;
                     default:
                         throw new \RuntimeException('Invalid adapter specified: ' . $this->options['adapter']);

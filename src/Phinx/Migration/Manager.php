@@ -28,10 +28,7 @@
  */
 namespace Phinx\Migration;
 
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\NullOutput;
-use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Config\Config;
 use Phinx\Migration\Manager\Environment;
 use RecursiveDirectoryIterator;
@@ -66,17 +63,18 @@ class Manager
      *
      * @param Config $config Config
      * @param OutputInterface $output Console Output
-     * @return void
      */
     public function __construct(Config $config, OutputInterface $output)
     {
         $this->setConfig($config);
         $this->setOutput($output);
     }
-    
+
     /**
      * Prints the specified environment's migration status.
      *
+     * @param string $environment
+     * @param null $format
      * @return void
      */
     public function printStatus($environment, $format = null)
@@ -90,7 +88,7 @@ class Manager
         
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersions();
-        
+
             foreach ($this->getMigrations() as $migration) {
                 if (in_array($migration->getVersion(), $versions)) {
                     $status = '     <info>up</info> ';
@@ -158,7 +156,7 @@ class Manager
             $version = max(array_merge($versions, array_keys($migrations)));
         } else {
             if (0 != $version && !isset($migrations[$version])) {
-                $this->getOutput()->writeln(sprintf(
+                $this->output->writeln(sprintf(
                     '<comment>warning</comment> %s is not a valid version',
                     $version
                 ));
@@ -266,7 +264,6 @@ class Manager
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersions();
         $pendingVersions = $env->getPendingVersions();
-        $current = $env->getCurrentVersion();
         
         ksort($migrations);
         sort($versions);
@@ -326,12 +323,13 @@ class Manager
         $this->environments = $environments;
         return $this;
     }
-    
+
     /**
      * Gets the manager class for the given environment.
      *
      * @param string $name Environment Name
-     * @return void
+     * @throws \InvalidArgumentException
+     * @return Environment
      */
     public function getEnvironment($name)
     {
@@ -402,18 +400,18 @@ class Manager
     /**
      * Gets an array of the database migrations.
      *
-     * @return array
+     * @throws \InvalidArgumentException
+     * @return AbstractMigration[]
      */
     public function getMigrations()
     {
         if (null === $this->migrations) {
-            $migrations = array();
-
             $config = $this->getConfig();
             $phpFiles = $this->recursiveFindMigrations($config->getMigrationPath(), '*.php');
 
             // filter the files to only get the ones that match our naming scheme
             $fileNames = array();
+            /** @var AbstractMigration[] $versions */
             $versions = array();
             
             foreach ($phpFiles as $filePath) {
@@ -446,6 +444,7 @@ class Manager
                     $fileNames[$class] = basename($filePath);
                     
                     // load the migration file
+                    /** @noinspection PhpIncludeInspection */
                     require_once $filePath;
                     if (!class_exists($class)) {
                         throw new \InvalidArgumentException(sprintf(
