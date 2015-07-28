@@ -947,6 +947,8 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         
         if (is_string($index->getName())) {
             $def .= ' `' . $index->getName() . '`';
+        } else {
+            $def .= ' `' . implode('', array_map('ucfirst', $index->getColumns())) . '`';
         }
         
         $def .= ' (`' . implode('`,`', $index->getColumns()) . '`)';
