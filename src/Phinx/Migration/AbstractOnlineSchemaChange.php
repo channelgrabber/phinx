@@ -11,7 +11,7 @@ abstract class AbstractOnlineSchemaChange extends AbstractMigration
     protected function onlineSchemaChange($table, $alter)
     {
         $options = $this->adapter->getOptions();
-        $config = require dirname(dirname(__DIR__)) . '/config/storage.local.php';
+        $config = require getcwd() . '/config/storage.local.php';
         if (!isset($config[$options['name']])) {
             throw new \InvalidArgumentException('Root access is not configured for database ' . $options['name']);
         }
