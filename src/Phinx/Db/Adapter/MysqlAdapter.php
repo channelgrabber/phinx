@@ -57,6 +57,17 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
     const INT_BIG     = 18446744073709551615;
 
     /**
+     * {@inheritDoc}
+     */
+    public function setOptions(array $options)
+    {
+        if (!isset($options['charset'])) {
+            $options['charset'] = 'utf8mb4';
+        }
+        return parent::setOptions($options);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function connect()
@@ -255,7 +266,7 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         // This method is based on the MySQL docs here: http://dev.mysql.com/doc/refman/5.1/en/create-index.html
         $defaultOptions = array(
             'engine' => 'InnoDB',
-            'collation' => 'utf8_general_ci'
+            'collation' => 'utf8mb4_unicode_ci'
         );
         $options = array_merge($defaultOptions, $table->getOptions());
         
