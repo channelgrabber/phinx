@@ -1,6 +1,6 @@
 # Changelog
 
-## ?
+## 0.3.8.3 - 17/04/2018
 ### [LIS-128](https://orderhub.atlassian.net/browse/LIS-128)
 Added pt-online-schema parameter `--critical-load Threads_running` as configurable 
 
