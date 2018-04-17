@@ -8,7 +8,7 @@ use Phinx\Db\Adapter\MysqlAdapter;
  */
 abstract class AbstractOnlineSchemaChange extends AbstractMigration
 {
-    protected function onlineSchemaChange($table, $alter)
+    protected function onlineSchemaChange($table, $alter, $maxThreads = 50)
     {
         $options = $this->adapter->getOptions();
         $config = require getcwd() . '/config/storage.local.php';
@@ -39,6 +39,7 @@ abstract class AbstractOnlineSchemaChange extends AbstractMigration
             '--execute',
             '--alter ' . escapeshellarg($alter),
             '--alter-foreign-keys-method ' . escapeshellarg('auto'),
+            '--critical-load Threads_running=' . escapeshellarg($maxThreads),
             escapeshellarg(implode(',', $dsn)),
         ];
 
